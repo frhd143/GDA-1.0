@@ -44,6 +44,10 @@ python3 main.py
 ```sh
 pip install -r requirements.txt
 ```
-3. Enjoy!
+3. To run the application open cmd, navigate to the folder and run
+```sh
+python3 main.py
+```
+4. Enjoy!
 
 

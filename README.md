@@ -13,4 +13,6 @@ This open-source project is available on Github for contributions to its continu
 #### Credits
 The theme used for this application is developed by: https://github.com/rdbende/Azure-ttk-theme.git
 
+## Installation:
+In order to install and use this application ... 
 

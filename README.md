@@ -18,7 +18,7 @@ The theme used for this application is developed by: https://github.com/rdbende/
 ### Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
 
 ### Linux 
-1. Download the files and extract it.
+1. Download the ZIP file and extract it.
 2. Install pip and Tkinter using:
 ```sh
 sudo apt install python3-pip
@@ -29,5 +29,9 @@ sudo apt-get install python3-pil python3-pil.imagetk
 ```sh
 pip install -r requirements.txt
 ```
-4. To run the application go to the 
+4. To run the extracted folder and run the main.py
+```sh
+python3 main.py
+```
+5. Enjoy!
 

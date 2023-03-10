@@ -11,9 +11,6 @@ This open-source project is available on Github for contributions to its continu
 #### Credits
 The theme used for this application is developed by: https://github.com/rdbende/Azure-ttk-theme.git
 
-## How to use the application
-
-
 
 ## Installation:
 - The application is compatible with all major operating systems (Windows, MacOS, Linux, etc.).
@@ -53,3 +50,11 @@ python3 main.py
 4. Enjoy!
 
 
+## How to use the application
+1. Open the sidebar:
+![one](https://user-images.githubusercontent.com/34188200/224417281-5c9e832c-0b04-4675-ba3b-058a21f00c3b.png)
+
+2. Choose your platform and choose a time period:
+![two](https://user-images.githubusercontent.com/34188200/224417309-99d017e5-1a96-43e1-8689-847f37ad06f8.png)
+
+3. It takes some time to crawl data depending on how long the time period is. So be patient!

@@ -52,9 +52,17 @@ python3 main.py
 
 ## How to use the application
 1. Open the sidebar:
+
 ![one](https://user-images.githubusercontent.com/34188200/224417281-5c9e832c-0b04-4675-ba3b-058a21f00c3b.png)
 
 2. Choose your platform and choose a time period:
+
 ![two](https://user-images.githubusercontent.com/34188200/224417309-99d017e5-1a96-43e1-8689-847f37ad06f8.png)
 
-3. It takes some time to crawl data depending on how long the time period is. So be patient!
+3. It takes some time to crawl data depending on your time period. So be patient!
+
+
+## Found bugs or having some advice/tips (or even problems)?
+- You can reach me here: f.asadi2002@gmail.com
+
+

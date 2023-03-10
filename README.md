@@ -18,8 +18,10 @@ The theme used for this application is developed by: https://github.com/rdbende/
 ### Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
 
 ### Linux 
-```sh 
-1. sudo apt install python3-pip
+1.
+```sh
+sudo apt install python3-pip
+```
 
 
 

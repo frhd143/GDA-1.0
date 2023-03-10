@@ -40,5 +40,10 @@ python3 main.py
 
 ### Windows OS:
 1. Download the ZIP file and extract it
+2. Install the requiremetns.txt using:
+```sh
+pip install -r requirements.txt
+```
+3. Enjoy!
 
 

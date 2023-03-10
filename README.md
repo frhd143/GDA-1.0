@@ -10,8 +10,7 @@ The tool helps developers, project managers, and stakeholders to identify trends
 
 This open-source project is available on Github for contributions to its continuous improvement and expansion.
 
-
-
+#### Credits
 The theme used for this application is developed by: https://github.com/rdbende/Azure-ttk-theme.git
 
 

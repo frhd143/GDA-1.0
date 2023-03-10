@@ -66,7 +66,7 @@ python3 main.py
 
 
 
-## Found bugs or having some advice/tips (or even problems)?
-- You can reach me here: f.asadi2002@gmail.com
-
+## Contributing
+Contributions to this project are welcome. If you find a bug or want to suggest an improvement, please open an issue or submit a pull request.
+Or email me here: f.asadi2002@gmail.com
 

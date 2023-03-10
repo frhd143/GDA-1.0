@@ -4,7 +4,7 @@
 
 
 ## Description:
-This Python application crawls code review data through Gerrit REST API from Android, OpenStack, and Chromium platforms and visualizes it using Matplotlib. The user-friendly GUI built with Tkinter allows users to select the platform and time period for analysis. All the data is then saved in JSON file called data.json in the Storage directory. All the graphs and chart are also exported and stored in the Storage/PDF_Files directory. 
+This Python application crawls code review data through Gerrit REST API from Android, OpenStack, and Chromium platforms and visualizes it using Matplotlib. The user-friendly GUI built with Tkinter allows users to select the platform and time period for analysis. All the data is then saved in JSON file called data.json in the Storage directory. All the graphs and chart are also exported and stored in the Storage/PDF_Files directory (Check Storage/PDF_Files for examples). 
 
 This open-source project is available on Github for contributions to its continuous improvement and expansion.
 

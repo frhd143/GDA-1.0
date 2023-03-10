@@ -23,15 +23,18 @@ The theme used for this application is developed by: https://github.com/rdbende/
 ```sh
 sudo apt install python3-pip
 sudo apt install python3-tk
+```
+3. Install pil and pil.imagetk using:
+```sh
 sudo apt-get install python3-pil python3-pil.imagetk
 ```
-3. Install the requiremetns.txt using:
+4. Install the requiremetns.txt using:
 ```sh
 pip install -r requirements.txt
 ```
-4. To run the extracted folder and run the main.py
+5. To run the application go to the extracted folder and run the main.py
 ```sh
 python3 main.py
 ```
-5. Enjoy!
+6. Enjoy!
 

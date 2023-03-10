@@ -4,14 +4,16 @@
 
 
 ## Description:
-This Python application crawls code review data through Gerrit REST API from Android, OpenStack, and Chromium platforms and visualizes it using Matplotlib. The user-friendly GUI built with Tkinter allows users to select the platform and time period for analysis. All the data is then saved in JSON file called data.JSON. All the graphs and chart are also exported and stored in the PDF_Files directory. 
-
-The tool helps developers, project managers, and stakeholders to identify trends, patterns, and bottlenecks in their code review process, optimizing their workflow and improving efficiency. 
+This Python application crawls code review data through Gerrit REST API from Android, OpenStack, and Chromium platforms and visualizes it using Matplotlib. The user-friendly GUI built with Tkinter allows users to select the platform and time period for analysis. All the data is then saved in JSON file called data.json in the Storage directory. All the graphs and chart are also exported and stored in the Storage/PDF_Files directory. 
 
 This open-source project is available on Github for contributions to its continuous improvement and expansion.
 
 #### Credits
 The theme used for this application is developed by: https://github.com/rdbende/Azure-ttk-theme.git
+
+## How to use the application
+
+
 
 ## Installation:
 - The application is compatible with all major operating systems (Windows, MacOS, Linux, etc.).

@@ -14,10 +14,8 @@ This open-source project is available on Github for contributions to its continu
 The theme used for this application is developed by: https://github.com/rdbende/Azure-ttk-theme.git
 
 ## Installation:
-####Compatibility:
 - The application is compatible with all major operating systems (Windows, MacOS, Linux, etc.).
-
-####Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
+###- Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
 
 
 

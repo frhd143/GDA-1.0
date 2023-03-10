@@ -17,5 +17,8 @@ The theme used for this application is developed by: https://github.com/rdbende/
 - The application is compatible with all major operating systems (Windows, MacOS, Linux, etc.).
 ### Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
 
+### Linux 
+-1 sh sudo apt install python3-pip
+
 
 

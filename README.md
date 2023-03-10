@@ -17,7 +17,7 @@ The theme used for this application is developed by: https://github.com/rdbende/
 - The application is compatible with all major operating systems (Windows, MacOS, Linux, etc.).
 ### Note! To run the application, you will need to have Python 3.7 or higher installed on your system.
 
-### Linux 
+### Linux:
 1. Download the ZIP file and extract it.
 2. Install pip and Tkinter using:
 ```sh
@@ -37,4 +37,8 @@ pip install -r requirements.txt
 python3 main.py
 ```
 6. Enjoy!
+
+### Windows OS:
+1. Download the ZIP file and extract it
+
 

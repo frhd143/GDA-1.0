@@ -55,7 +55,7 @@ python3 main.py
 2. Install `python3-pip`
 3. Install `python3-tk`
 4. Install `python3-pil` and `python3-pil.imagetk`
-5. Once you have installed these you have to install the requirements.txt using `pip`:
+5. Once you have installed these you have to install the `requirements.txt` using `pip`:
 ```sh
 pip install -r requirements.txt
 ```

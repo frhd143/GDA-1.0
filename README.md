@@ -31,7 +31,8 @@ sudo apt-get install python3-pil python3-pil.imagetk
 ```sh
 pip install -r requirements.txt
 ```
-5. To run the application go to the extracted folder and run the main.py (#### Note! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.).
+5. To run the application go to the extracted folder and run the main.py.
+#### (Warning! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.)
 ```sh
 python3 main.py
 ```
@@ -43,7 +44,8 @@ python3 main.py
 ```sh
 pip install -r requirements.txt
 ```
-3. To run the application open cmd, navigate to the folder and run (#### Note! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.).
+3. To run the application open cmd, navigate to the folder and run
+#### (Warning! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.)
 ```sh
 python3 main.py
 ```
@@ -59,7 +61,8 @@ python3 main.py
 ```sh
 pip install -r requirements.txt
 ```
-6. To run the application open cmd, navigate to the folder and run (#### Note! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.).
+6. To run the application open cmd, navigate to the folder and run 
+#### (Warning! Every time you run the application, all the data in the `Storage` directory is removed/replaced with the new data.)
 ```sh
 python3 main.py
 ```

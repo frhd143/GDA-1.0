@@ -50,7 +50,7 @@ python3 main.py
 4. Enjoy!
 
 ### MacOS
-#### Note! The application has not been tested in MacOS, but it should work if you install the necessary libraries and packes
+#### Note! The application has not been tested in MacOS, but it should work if you install the necessary libraries and packages
 1. Download the ZIP file and extract it.
 2. Install `python3-pip`
 3. Install `python3-tk`

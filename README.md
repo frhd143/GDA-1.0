@@ -49,6 +49,23 @@ python3 main.py
 ```
 4. Enjoy!
 
+### MacOS
+#### Note! The application has not been tested in MacOS, but it should work if you install the necessary libraries and packes
+1. Download the ZIP file and extract it.
+2. Install `python3-pip`
+3. Install `python3-tk`
+4. Install `python3-pil` and `python3-pil.imagetk`
+5. Once you have installed these you have to install the requirements.txt using `pip`:
+```sh
+pip install -r requirements.txt
+```
+6. To run the application open cmd, navigate to the folder and run
+```sh
+python3 main.py
+```
+7. Enjoy!
+
+
 
 ## How to use the application
 1. Open the sidebar:
@@ -60,7 +77,6 @@ python3 main.py
 ![two](https://user-images.githubusercontent.com/34188200/224417309-99d017e5-1a96-43e1-8689-847f37ad06f8.png)
 
 3. It takes some time to crawl data depending on your time period. So be patient!
-
 
 
 

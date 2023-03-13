@@ -9,198 +9,243 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-
-
-def get_reviews(start_date, end_date, plt):
-    """
-    Summary: This function crawls code review data from Gerrit REST API and then stores all the data into a list.
-            The function then returns the list.
-
-    Args:
-        start_date (str): This date indicates the start date in the time period.
-        end_date (str): This date indicates the end date in the time period.
-        plt (str): This indicates what platform you want to crawl data for.
-
-    Returns:
-        if everything is successful:
-            changes (list): The list contains all the reviews crawled from the Gerrit REST API
-        if NOT successful:
-            0: If there is a problem while crawling data then return 0.
-    """
-
-    changes = []
-    start = 0
-    url = ""
-    max_review = 0
-    if plt == "Android":
-        android_url = f"https://android-review.googlesource.com/changes/?q=after:{start_date} before:{end_date}"
-        url = android_url
-        max_review = 2000
-    elif plt == "OpenStack":
-        openstack_url = f"https://review.opendev.org/changes/?q=after:{start_date} before:{end_date}"
-        url = openstack_url
-        max_review = 500
-    elif plt == "Chromium":
-        chromium_url = f"https://chromium-review.googlesource.com/changes/?q=after:{start_date} before:{end_date}"
-        url = chromium_url
-        max_review = 500
-    
-    # Crawl more than max allowed review. 
-    while True:
-        response = requests.get(url + f"&S={start}")
-        if response.status_code != 200:
-            return 0
+class CodeReviewData:
+    def get_reviews(self, start_date, end_date, plt):
+        """
+        Summary: This function crawls code review data from Gerrit REST API and then stores all the data into a list.
+                The function then returns the list.
+        Args:
+            start_date (str): This date indicates the start date in the time period.
+            end_date (str): This date indicates the end date in the time period.
+            plt (str): This indicates what platform you want to crawl data for.
+        Returns:
+            if everything is successful:
+                changes (list): The list contains all the reviews crawled from the Gerrit REST API
+            if NOT successful:
+                0: If there is a problem while crawling data then return 0.
+        """
+        changes = []
+        start = 0
+        url = ""
+        max_review = 0
+        if plt == "Android":
+            android_url = f"https://android-review.googlesource.com/changes/?q=after:{start_date} before:{end_date}"
+            url = android_url
+            max_review = 2000
+        elif plt == "OpenStack":
+            openstack_url = f"https://review.opendev.org/changes/?q=after:{start_date} before:{end_date}"
+            url = openstack_url
+            max_review = 500
+        elif plt == "Chromium":
+            chromium_url = f"https://chromium-review.googlesource.com/changes/?q=after:{start_date} before:{end_date}"
+            url = chromium_url
+            max_review = 500
         else:
-            response_data = json.loads(response.content.decode('utf-8')[4:])
-            changes.extend(response_data)
-            if len(response_data) < max_review:
-                break
-            start += max_review
+            return 0
 
-    # Chack the last review. If the last review does not match the start_date then call the get_reviews function. 
-    # The start_date is the same, but the end_date is not las_review.
-    last_review = changes[-1]["updated"][:10]
-    if last_review > start_date:
-         new_changes = get_reviews(start_date, last_review, plt)
-         changes = changes + new_changes
+        # Crawl more than max allowed review. 
+        while True:
+            response = requests.get(url + f"&S={start}")
+            if response.status_code != 200:
+                return 0
+            else:
+                response_data = json.loads(response.content.decode('utf-8')[4:])
+                changes.extend(response_data)
+                if len(response_data) < max_review:
+                    break
+                start += max_review
+
+        # Check the last review. If the last review does not match the start_date then call the get_reviews function. 
+        # The start_date is the same, but the end_date is not las_review.
+        last_review = changes[-1]["updated"][:10]
+        if last_review > start_date:
+             new_changes = self.get_reviews(start_date, last_review, plt)
+             changes = changes + new_changes
+        return changes
+
+
+    def filter_data(self, reviews_lst):
+        """
+        Summary: This function gets the list of reviews returned from the get_reviews function as an arg, filter the data, and
+                then retuns a list that contains these filtered data. 
+        Args:
+            reviews_lst (list): The list contains all code review data retuned from the get_review function.
+        Returns:
+            if successful:
+                returned_data (type:list): When the data is filtered, it is stored in a list called returned_data.
+            if NOT successful:
+                0: when getting data from the get_reviews function, a problem might occur. 
+        """
+        if reviews_lst == 0:
+            return 0
+        
+        returned_data = []
+        reviews_opened = {}
+        reviews_closed = {}
+        active_developers = {}
+        developers_per_month = {}
+        for change in reviews_lst:
+            ################ Reviews opened and closed #################
+            timestamp_str = change['updated'][:10]
+            if timestamp_str not in reviews_opened:
+                reviews_opened[timestamp_str] = 0
+            if timestamp_str not in reviews_closed:
+                reviews_closed[timestamp_str] = 0
+            if change.get('status') == 'NEW':
+                reviews_opened[timestamp_str] += 1
+            elif change.get('status') in ['MERGED', 'ABANDONED']:
+                reviews_closed[timestamp_str] += 1
+
+            ############### Active developer per month ################
+            timestamp_str = change['updated'][:19]
+            timestamp = int(datetime.fromisoformat(timestamp_str).timestamp())
+            dt = datetime.fromtimestamp(timestamp)
+            year_month = dt.strftime('%Y-%m')
+            if 'owner' in change and '_account_id' in change['owner'] and change['owner']['_account_id'] is not None:
+                if year_month not in active_developers:
+                    active_developers[year_month] = set()
+                active_developers[year_month].add(change["owner"]["_account_id"])
+            if 'submitter' in change and '_account_id' in change['submitter'] and change['submitter']['_account_id'] is not None:
+                if year_month not in active_developers:
+                    active_developers[year_month] = set()
+                active_developers[year_month].add(change["submitter"]["_account_id"])
+
+        for year_month, developers in active_developers.items():
+            developers_per_month[year_month] = len(developers)
+
+        returned_data.append(reviews_opened)
+        returned_data.append(reviews_closed)
+        returned_data.append(developers_per_month)
+
+        # Store the file in a JSON file valled data.json
+        if os.path.exists("Storage/data.json") == True:
+            os.remove("Storage/data.json")
+            with open("Storage/data.json", "w") as outfile:
+                json.dump(reviews_lst, outfile, indent=4)
+        else:
+            with open("Storage/data.json", "w") as outfile:
+                json.dump(reviews_lst, outfile, indent=4)
+
+        return returned_data
+
+
+class GerritDataAnalyzer: 
+    # test is used for unit testing
+    def __init__(self, test=False):
+        self.root = tk.Tk()
+        self.root.title("GerritDataAnalyzer")
+
+        ico = Image.open('icon.png')
+        photo = ImageTk.PhotoImage(ico)
+        self.root.wm_iconphoto(False, photo)
+
+        # This theme is available on GitHub: https://github.com/rdbende/Azure-ttk-theme.git
+        self.root.tk.call("source", "azure.tcl")
+        self.root.tk.call("set_theme", "dark")
+
+        self.root.geometry("1498x943")
+        self.root.minsize(1498, 943)
     
-    return changes
+        img1 = ImageTk.PhotoImage(Image.open("open.png"))
+        self.home_page(img1)
+        if test == False:
+            self.root.mainloop()
+        
+    def home_page(self, img1):
+        background_label = ttk.Label(self.root,
+                                    text="GerritDataAnalyzer",
+                                    font=("TkDefaultFont", 60, "bold"),
+                                    foreground="grey")
 
+        background_label.place(relx=0.5, rely=0.5, anchor="center")
 
-def filter_data(reviews_lst):
-    """
-    Summary: This function gets the list of reviews returned from the get_reviews function as an arg, filter the data, and
-             then retuns a list that contains these filtered data. 
+        global b2
+        b2=tk.Button(self.root, 
+                    image=img1,
+                    command=self.toggle_sidebar,
+                    border=0,
+                    bg='#262626',
+                    activebackground='#262626').place(x=5,y=8)
 
-    Args:
-        reviews_lst (list): The list contains all code review data retuned from the get_review function.
-
-    Returns:
-        if successful:
-            returned_data (type:list): When the data is filtered, it is stored in a list called returned_data.
-        if NOT successful:
-            0: when getting data from the get_reviews function, a problem might occur. 
-    """
-    if reviews_lst == 0:
-        return 0
-
-    returned_data = []
-    reviews_opened = {}
-    reviews_closed = {}
-    active_developers = {}
-    developers_per_month = {}
-    for change in reviews_lst:
-        ################ Reviews opened and closed #################
-        timestamp_str = change['updated'][:10]
-        if timestamp_str not in reviews_opened:
-            reviews_opened[timestamp_str] = 0
-        if timestamp_str not in reviews_closed:
-            reviews_closed[timestamp_str] = 0
-        if change.get('status') == 'NEW':
-            reviews_opened[timestamp_str] += 1
-        elif change.get('status') in ['MERGED', 'ABANDONED']:
-            reviews_closed[timestamp_str] += 1
-
-        ############### Active developer per month ################
-        timestamp_str = change['updated'][:19]
-        timestamp = int(datetime.fromisoformat(timestamp_str).timestamp())
-        dt = datetime.fromtimestamp(timestamp)
-        year_month = dt.strftime('%Y-%m')
-        if 'owner' in change and '_account_id' in change['owner'] and change['owner']['_account_id'] is not None:
-            if year_month not in active_developers:
-                active_developers[year_month] = set()
-            active_developers[year_month].add(change["owner"]["_account_id"])
-        if 'submitter' in change and '_account_id' in change['submitter'] and change['submitter']['_account_id'] is not None:
-            if year_month not in active_developers:
-                active_developers[year_month] = set()
-            active_developers[year_month].add(change["submitter"]["_account_id"])
-
-    for year_month, developers in active_developers.items():
-        developers_per_month[year_month] = len(developers)
-
-
-    returned_data.append(reviews_opened)
-    returned_data.append(reviews_closed)
-    returned_data.append(developers_per_month)
-
-
-    # Store the file in a JSON file valled data.json
-    if os.path.exists("Storage/data.json") == True:
-        os.remove("Storage/data.json")
-        with open("Storage/data.json", "w") as outfile:
-            json.dump(reviews_lst, outfile, indent=4)
-    else:
-        with open("Storage/data.json", "w") as outfile:
-            json.dump(reviews_lst, outfile, indent=4)
-
-    return returned_data
-
-
-def tkinter_gui():
-    """
-    Summary:
-        The function uses tkinter(or ttk) to create a GUI.    
-
-    Returns:
-        Nothing: The function does not return anything.
-    """
-
-    root = tk.Tk()
-    root.title("GerritDataAnlyser")
-
-    ico = Image.open('icon.png')
-    photo = ImageTk.PhotoImage(ico)
-    root.wm_iconphoto(False, photo)
-
-    # This theme is available on GitHub: https://github.com/rdbende/Azure-ttk-theme.git
-    root.tk.call("source", "azure.tcl")
-    root.tk.call("set_theme", "dark")
-
-    root.geometry("1498x943")
-    root.minsize(1498, 943)
-
-    def change_theme():
+    def change_theme(self):
         """
         Summary:
             This funciton is used to chage the theme of the application
         """
         global f1, from_label, to_label, style_radio_frame
-        current_theme = root.tk.call("ttk::style", "theme", "use")
+        current_theme = self.root.tk.call("ttk::style", "theme", "use")
 
         if current_theme == "azure-dark":
-            root.tk.call("set_theme", "light")
+            self.root.tk.call("set_theme", "light")
             f1.config(bg="#F5F5F5")
             from_label.config(background="#F5F5F5")
             to_label.config(background="#F5F5F5")
             style_radio_frame.configure("Custom.TLabelframe", background="#F5F5F5")
             
         else:
-            root.tk.call("set_theme", "dark")
+            self.root.tk.call("set_theme", "dark")
             f1.config(bg="#191818")
             from_label.config(background="#191818")
             to_label.config(background="#191818")
             style_radio_frame.configure('Custom.TLabelframe', background='#191818')
 
+    # When one of the entries are being clicked on, remove the background text.
+    def when_entry_clicked(self, event, entry):
+        current_theme = self.root.tk.call("ttk::style", "theme", "use")
+        if entry.get() == "Ex: 2022-01-01":
+            entry.delete(0, "end")
+            if current_theme == "azure-dark":
+                entry.config(foreground="white")
+            else:
+                entry.config(foreground="black")
+        elif entry.get() == "Ex: 2022-03-31":
+            entry.delete(0, "end")
+            if current_theme == "azure-dark":
+                entry.config(foreground="white")
+            else:
+                entry.config(foreground="black")
 
-    def toggle_sidebar():
+    def validate_date_format(self, date_str1, date_str2):
+        """
+        Summary:
+            This function validates the format of the dates being entered buy the user.
+            The function also check if the start date is less (before, eariler) than end date
+        Args:
+            date_str1 (str): This is the start date
+            date_str2 (str): This is the end date
+        Returns:
+            if everything ok:
+                True: boolen
+            if NOT ok:
+                False: boolen
+        """
+        try:
+            datetime.strptime(date_str1, "%Y-%m-%d")
+            datetime.strptime(date_str2, "%Y-%m-%d")
+            if date_str1 >= date_str2:
+                return False
+            else:
+                return True
+        except ValueError:
+            return False
+
+    def toggle_sidebar(self):
         """
         Summary:
             This function creates a sidebar for the application
         """
-
         global f1, from_label, to_label, style_radio_frame
-        current_theme = root.tk.call("ttk::style", "theme", "use")
+        current_theme = self.root.tk.call("ttk::style", "theme", "use")
         if current_theme == "azure-dark":
-            f1 = tk.Frame(root, width=500, height=1200, bg='#191818')
+            f1 = tk.Frame(self.root, width=500, height=1200, bg='#191818')
         else:
-            f1 = tk.Frame(root, width=500, height=1200, bg='#f5f5f5')
+            f1 = tk.Frame(self.root, width=500, height=1200, bg='#f5f5f5')
         f1.place(x=0,y=0)
-
 
         # Platform; Creting radiobuttons for the user to choose the desired platform
         radio_frame = ttk.LabelFrame(f1, text="Platforms: ", padding=(40, 20))
         style_radio_frame = ttk.Style()
-        current_theme = root.tk.call("ttk::style", "theme", "use")
+        current_theme = self.root.tk.call("ttk::style", "theme", "use")
         if current_theme == "azure-dark":
             style_radio_frame.configure("Custom.TLabelframe", background="#191818")
         else:
@@ -236,79 +281,32 @@ def tkinter_gui():
         entry2.insert("end", "Ex: 2022-03-31")
         entry2.config(foreground="gray")
         
-       # When one of the entries are being clicked on, remove the background text.
-        def when_entry_clicked(event, entry):
-            current_theme = root.tk.call("ttk::style", "theme", "use")
-            if entry.get() == "Ex: 2022-01-01":
-                entry.delete(0, "end")
-                if current_theme == "azure-dark":
-                    entry.config(foreground="white")
-                else:
-                    entry.config(foreground="black")
-            elif entry.get() == "Ex: 2022-03-31":
-                entry.delete(0, "end")
-                if current_theme == "azure-dark":
-                    entry.config(foreground="white")
-                else:
-                    entry.config(foreground="black")
+        entry1.bind("<FocusIn>", lambda event: self.when_entry_clicked(event, entry1))
+        entry2.bind("<FocusIn>", lambda event: self.when_entry_clicked(event, entry2))
 
-        entry1.bind("<FocusIn>", lambda event: when_entry_clicked(event, entry1))
-        entry2.bind("<FocusIn>", lambda event: when_entry_clicked(event, entry2))
-
-
-        def validate_date_format(date_str1, date_str2):
-            """
-            Summary:
-                This function validates the format of the dates being entered buy the user.
-                The function also check if the start date is less (before, eariler) than end date
-
-            Args:
-                date_str1 (str): This is the start date
-                date_str2 (str): This is the end date
-
-            Returns:
-                if everything ok:
-                    True: boolen
-                if NOT ok:
-                    False: boolen
-            """
-            try:
-                datetime.strptime(date_str1, "%Y-%m-%d")
-                datetime.strptime(date_str2, "%Y-%m-%d")
-                if date_str1 >= date_str2:
-                    return False
-                else:
-                    return True
-            except ValueError:
-                return False
-
-
-        def save_data():
+        def get_user_data_from_gui():
             """
             Summary:
                 This funciton is where everything starts. The funciton extracts/gets the dates entered in
                 the entries and the platfrom chosen by the user. 
-
                 The function then uses the validate_date_format to validate the dates. When the date is validated
                 then function then calls the get_reviews function to crawl data. 
-
                 The function then passes the data from the get_reviews() to the filter_data() function in order to 
                 filter the data. 
-
                 The filtered data then is passed to the visulize_data() function.
             """
             from_date = entry1.get()
             to_date = entry2.get()
             platfrom = var.get()
 
-            valid_date = validate_date_format(from_date, to_date)
+            valid_date = self.validate_date_format(from_date, to_date)
             destroy_window()
             if valid_date == False:
-                notebook = ttk.Notebook(root, width=1400, height=800)
+                notebook = ttk.Notebook(self.root, width=1400, height=800)
                 notebook.place(relx=0.5, rely=0.5, anchor="center")
                 Error_message = ttk.Frame(notebook)
                 notebook.add(Error_message, text="InputError!")
-                the_message = ttk.Label(root,
+                the_message = ttk.Label(self.root,
                                     text="InputError: Either Wrong Date format(Expected format: 'YYYY-MM-DD')\nor start date is after the end date. Please try again! ",
                                     font=("TkDefaultFont", 20, "bold"),
                                     foreground="grey")
@@ -316,14 +314,15 @@ def tkinter_gui():
                 the_message.place(relx=0.5, rely=0.5, anchor="center")
 
             else:
-                reviews_lst = get_reviews(from_date, to_date, platfrom)
-                returned_data = filter_data(reviews_lst)
+                reviews = CodeReviewData()
+                reviews_lst = reviews.get_reviews(from_date, to_date, platfrom)
+                returned_data = reviews.filter_data(reviews_lst)
                 if returned_data == 0:
-                    notebook = ttk.Notebook(root, width=1400, height=800)
+                    notebook = ttk.Notebook(self.root, width=1400, height=800)
                     notebook.place(relx=0.5, rely=0.5, anchor="center")
                     Error_message = ttk.Frame(notebook)
                     notebook.add(Error_message, text="Error!")
-                    the_message = ttk.Label(root,
+                    the_message = ttk.Label(self.root,
                                             text="APIError: There was an issue with the API. Please try again!",
                                             font=("TkDefaultFont", 20, "bold"),
                                             foreground="grey")
@@ -333,11 +332,11 @@ def tkinter_gui():
                     reviews_opened = returned_data[0]
                     reviews_closed = returned_data[1]
                     developer_per_month = returned_data[-1]
-                    visulize_data(reviews_opened, reviews_closed, developer_per_month)
+                    self.visulize_data(reviews_opened, reviews_closed, developer_per_month)
 
 
-        # Creating a submit button. When the submit is pressed the save_data is called.
-        submit_button = ttk.Button(f1, text="Submit", command=save_data)
+        # Creating a submit button. When the submit is pressed the get_user_data_from_gui is called.
+        submit_button = ttk.Button(f1, text="Submit", command=get_user_data_from_gui)
         submit_button.place(relx=0.5, rely=0.65, anchor="center")
 
         style = ttk.Style()
@@ -347,17 +346,17 @@ def tkinter_gui():
         # the change_theme() function is called. 
         change_theme_button = ttk.Button(f1, 
                             text="Change Theme",
-                            command=change_theme)
+                            command=self.change_theme)
         change_theme_button.place(relx=0.5, rely=0.75, anchor="center")
 
 
         def destroy_window():
             """
             Summary:
-                The funciton is used to destroy a frame/window
+                The funciton is used to destroy a frame/window and update the root frame
             """
             f1.destroy()
-            root.update()
+            self.root.update()
 
         # create a close button for closing the sidebar. An png file is used to visulize the button.
         global img2
@@ -370,8 +369,7 @@ def tkinter_gui():
                 bg='#262626',
                 activebackground='#262626').place(x=450,y=10)
 
-
-    def visulize_data(rev_opened, rev_closed, dev_per_month):
+    def visulize_data(self, rev_opened, rev_closed, dev_per_month):
         """
             Summary:
                 This function validates the format of the dates being entered buy the user.
@@ -398,14 +396,14 @@ def tkinter_gui():
         rev_closed_number = list(rev_closed.values())
         rev_closed_timestamp.reverse()
         rev_closed_number.reverse()
-        
+
         month = list(dev_per_month.keys())
         devs = list(dev_per_month.values())
         month.reverse()
         devs.reverse()
 
         # Creating a notebook in the middle of the application that can be used to plece the graphs on
-        notebook = ttk.Notebook(root, width=1400, height=800)
+        notebook = ttk.Notebook(self.root, width=1400, height=800)
         notebook.place(relx=0.5, rely=0.5, anchor="center")
 
         # Creating a tab for each of the graph
@@ -421,17 +419,16 @@ def tkinter_gui():
         notebook.add(active_developers_tab, text="Active developers per month: ")    
 
         # Creating the graph using the create_graph() function and then exporting each graph as a PDF file in the Storage/PDF_Files directory
-        fig = create_graph(rev_opened_timestamp, rev_opened_number, reviews_opened_and_closed_tab, "blue", "Review Closed AND Opened", rev_closed_timestamp, rev_closed_number)    
+        fig = self.create_graph(rev_opened_timestamp, rev_opened_number, reviews_opened_and_closed_tab, "blue", "Review Closed AND Opened", rev_closed_timestamp, rev_closed_number)    
         fig.savefig("Storage/PDF_Files/Rev_opened_closed.pdf")
-        fig = create_graph(rev_opened_timestamp, rev_opened_number, reviews_opened, "blue", "Review Opened")
+        fig = self.create_graph(rev_opened_timestamp, rev_opened_number, reviews_opened, "blue", "Review Opened")
         fig.savefig("Storage/PDF_Files/Rev_opened.pdf")
-        fig = create_graph(rev_closed_timestamp, rev_closed_number, reviews_closed, "red", "Reviews Closed")
+        fig = self.create_graph(rev_closed_timestamp, rev_closed_number, reviews_closed, "red", "Reviews Closed")
         fig.savefig("Storage/PDF_Files/Rev_closed.pdf")
-        fig = create_graph(month, devs, active_developers_tab,"blue", "Developers per month", pie_chart=1)
+        fig = self.create_graph(month, devs, active_developers_tab,"blue", "Developers per month", pie_chart=1)
         fig.savefig("Storage/PDF_Files/Dev_per_month.pdf")
-
-
-    def create_graph(x1, y1, tab, color, title, x2=None, y2=None, pie_chart=None):
+    
+    def create_graph(self, x1, y1, tab, color, title, x2=None, y2=None, pie_chart=None):
         """
         Summary:
             This function creates a graph. The type of the graph is base on the args sent to the function.
@@ -523,34 +520,5 @@ def tkinter_gui():
         return fig
 
 
-    def home_page(img1):
-        """
-        Summary:
-            Funtion for the home page
-
-        Args:
-            img1 (image): Image for the sidebar
-        """
-        background_label = ttk.Label(root,
-                                    text="GerritDataAnalyser",
-                                    font=("TkDefaultFont", 60, "bold"),
-                                    foreground="grey")
-
-        background_label.place(relx=0.5, rely=0.5, anchor="center")
-
-        global b2
-        b2=tk.Button(root, 
-                    image=img1,
-                    command=toggle_sidebar,
-                    border=0,
-                    bg='#262626',
-                    activebackground='#262626').place(x=5,y=8)
-
-    global img1
-    img1 = ImageTk.PhotoImage(Image.open("open.png"))
-    home_page(img1)
-    root.mainloop()
-
-
-tkinter_gui()
-
+if __name__ == "__main__":
+    gda = GerritDataAnalyzer()

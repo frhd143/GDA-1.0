@@ -161,7 +161,7 @@ class GerritDataAnalyzer:
         self.root.minsize(1498, 943)
 
         img1 = ImageTk.PhotoImage(Image.open("open.png"))
-        print(type(img1))
+        #print(type(img1))
         self.home_page(img1)
         if test == False:
             self.root.mainloop()
